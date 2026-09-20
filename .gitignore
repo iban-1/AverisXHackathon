@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# organizer-only package: contains the answer key (ground_truth.json).
+# Kept locally to run the scoring server, never committed/shared.
+organizer/
+
+# generated output
+submission.json
+*.log
