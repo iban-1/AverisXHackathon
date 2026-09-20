@@ -17,8 +17,12 @@ _LABEL_LINE = re.compile(r"^([^:\n]{1,60}):\s*(.*)$")
 # Placeholder values used by the "missing_value" edge cases (blank fields
 # that are uncertainty, not a discrepancy) — extraction treats these as if
 # the field were absent so downstream comparison/reliability logic (M6) can
-# tell "not present" from "present but blank".
-_PLACEHOLDER_RE = re.compile(r"^(?:\?+|_+|TBA)$", re.IGNORECASE)
+# tell "not present" from "present but blank". Covers bare "???"/"_______",
+# a blank with a stray leftover unit ("____MT"), and word placeholders
+# (N/A, TBA, NIL, PENDING) — the full set observed across the dataset.
+_PLACEHOLDER_RE = re.compile(
+    r"^(?:[_?]+\s*(?:MTS?|KGS?)?|N/?A|TBA|NIL|PENDING)$", re.IGNORECASE
+)
 
 
 def extract_fields_txt(text: str) -> dict[str, str]:
