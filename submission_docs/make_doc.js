@@ -18,16 +18,16 @@ const numbering = {
   ],
 };
 
-const ORANGE = "C8632B";
-const DARK = "222222";
-const GREY = "555555";
+const ACCENT = "1E5F74"; // deep harbor teal — matches the live demo's accent
+const DARK = "1D2430";   // navy-charcoal ink
+const GREY = "5B6478";
 
 function h1(text) {
   return new Paragraph({
     heading: HeadingLevel.HEADING_1,
     spacing: { before: 320, after: 160 },
-    border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: ORANGE, space: 4 } },
-    children: [new TextRun({ text, bold: true, color: ORANGE, size: 30 })],
+    border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: ACCENT, space: 4 } },
+    children: [new TextRun({ text, bold: true, color: ACCENT, size: 30 })],
   });
 }
 
@@ -68,13 +68,13 @@ function boldLabel(label, rest) {
 function statCell(value, label) {
   return new TableCell({
     width: { size: 2340, type: WidthType.DXA },
-    shading: { type: ShadingType.CLEAR, fill: "FBEEE2" },
+    shading: { type: ShadingType.CLEAR, fill: "E4EEF0" },
     margins: { top: 160, bottom: 160, left: 120, right: 120 },
     children: [
       new Paragraph({
         alignment: AlignmentType.CENTER,
         spacing: { after: 40 },
-        children: [new TextRun({ text: value, bold: true, size: 30, color: ORANGE })],
+        children: [new TextRun({ text: value, bold: true, size: 30, color: ACCENT })],
       }),
       new Paragraph({
         alignment: AlignmentType.CENTER,
@@ -93,7 +93,7 @@ const doc = new Document({
         new Paragraph({
           alignment: AlignmentType.CENTER,
           spacing: { after: 40 },
-          children: [new TextRun({ text: "Shipping Document Verification", bold: true, size: 44, color: ORANGE })],
+          children: [new TextRun({ text: "Shipping Document Verification", bold: true, size: 44, color: ACCENT })],
         }),
         new Paragraph({
           alignment: AlignmentType.CENTER,
