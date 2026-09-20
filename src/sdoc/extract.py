@@ -7,7 +7,7 @@ value — the compared identity is the name on the label's own line.
 """
 import re
 
-from .synonyms import field_for_label
+from .synonyms import field_for_label, is_other_doc_type_label
 
 # Label text itself is unconstrained (some documents mix in CJK characters,
 # e.g. "Gross Weight毛重(KGS):") — synonyms.normalize_label() strips those
@@ -42,6 +42,26 @@ def extract_fields_txt(text: str) -> dict[str, str]:
             continue
         fields[field] = value
     return fields
+
+
+_EXPECTED_HEADERS = ("SHIPPING INSTRUCTION", "BILL OF LADING")
+
+
+def looks_like_other_doc_type(text: str) -> bool:
+    """True if a "BL"/"SI" attachment is actually some other document type
+    (Commercial Invoice, Packing List, Certificate of Origin). Primary
+    signal: the document's own header line doesn't name it as either an SI
+    or a BL. Secondary/defense-in-depth signal: labels from that other
+    document family (invoice/certificate fields — see
+    synonyms.OTHER_DOC_TYPE_LABELS) rather than any of the 7 compared ones."""
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    if lines and not any(h in lines[0].upper() for h in _EXPECTED_HEADERS):
+        return True
+    for line in text.splitlines():
+        m = _LABEL_LINE.match(line)
+        if m and is_other_doc_type_label(m.group(1)):
+            return True
+    return False
 
 
 def normalize_text_value(value: str) -> str:
