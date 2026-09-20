@@ -10,3 +10,6 @@ organizer/
 # generated output
 submission.json
 *.log
+
+# node deps for the submission-doc generator script
+submission_docs/node_modules/
