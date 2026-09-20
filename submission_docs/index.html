@@ -1,0 +1,449 @@
+<title>Manifest Check</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F6F2E9;
+    --surface: #FFFFFF;
+    --surface-2: #FBF8F1;
+    --ink: #1D2430;
+    --ink-soft: #656B78;
+    --ink-faint: #9A9E8F;
+    --accent: #1E5F74;
+    --accent-soft: #E4EEF0;
+    --line: #E4DFD1;
+    --ok: #1E7F4F;
+    --ok-bg: #E7F4EC;
+    --mismatch: #AE3626;
+    --mismatch-bg: #FBEAE6;
+    --review: #A8690F;
+    --review-bg: #FBF0DE;
+    --neutral-bg: #EEEBE2;
+    --font-display: "Big Shoulders Display", sans-serif;
+    --font-body: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #171A1F; --surface: #1F242B; --surface-2: #232830;
+      --ink: #ECEAE3; --ink-soft: #9DA3AE; --ink-faint: #6B7280;
+      --accent: #6FB8CC; --accent-soft: #223941;
+      --line: #333A44;
+      --ok: #6FCB94; --ok-bg: #1B2E22;
+      --mismatch: #E48A7C; --mismatch-bg: #3A231F;
+      --review: #E3B368; --review-bg: #3A2E19;
+      --neutral-bg: #262B33;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #171A1F; --surface: #1F242B; --surface-2: #232830;
+    --ink: #ECEAE3; --ink-soft: #9DA3AE; --ink-faint: #6B7280;
+    --accent: #6FB8CC; --accent-soft: #223941;
+    --line: #333A44;
+    --ok: #6FCB94; --ok-bg: #1B2E22;
+    --mismatch: #E48A7C; --mismatch-bg: #3A231F;
+    --review: #E3B368; --review-bg: #3A2E19;
+    --neutral-bg: #262B33;
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--font-body); overflow-x: hidden; }
+  ::selection { background: var(--accent); color: white; }
+
+  .app { display: flex; flex-direction: column; height: 100%; min-height: 100vh; }
+
+  /* ---------- header ---------- */
+  header.top {
+    padding: 22px clamp(16px, 4vw, 40px) 18px;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+  }
+  .top-row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .brand h1 {
+    font-family: var(--font-display); font-weight: 800; font-size: clamp(26px, 4vw, 34px);
+    letter-spacing: 0.01em; margin: 0; color: var(--ink); line-height: 1;
+  }
+  .brand .tag { color: var(--ink-soft); font-size: 13px; }
+  .team-badge {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 4px 10px;
+  }
+  .stats { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  .stat-tile {
+    background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px;
+    padding: 10px 16px; min-width: 108px; flex: 1 1 108px;
+  }
+  .stat-tile .v { font-family: var(--font-display); font-weight: 800; font-size: 24px; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .stat-tile .l { font-size: 11px; color: var(--ink-soft); letter-spacing: 0.02em; margin-top: 2px; }
+
+  /* ---------- layout ---------- */
+  .work { flex: 1; display: grid; grid-template-columns: 340px 1fr; min-height: 0; }
+  @media (max-width: 780px) {
+    .work { grid-template-columns: 1fr; }
+    .work.detail-open .sidebar { display: none; }
+    .work:not(.detail-open) .detail { display: none; }
+  }
+
+  .sidebar { display: flex; flex-direction: column; border-right: 1px solid var(--line); background: var(--surface); min-height: 0; min-width: 0; }
+  .filters { padding: 12px 14px 10px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+  .search input {
+    width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px;
+    font-family: var(--font-body); font-size: 13px; background: var(--surface-2); color: var(--ink);
+  }
+  .search input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .chip-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.02em; border-radius: 999px;
+    padding: 5px 10px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink-soft);
+    cursor: pointer; white-space: nowrap;
+  }
+  .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: white; }
+
+  .list { list-style: none; margin: 0; padding: 6px; overflow-y: auto; flex: 1; }
+  .row {
+    display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px;
+    cursor: pointer; border: 1px solid transparent;
+  }
+  .row:hover { background: var(--surface-2); }
+  .row[aria-current="true"] { background: var(--accent-soft); border-color: var(--accent); }
+  .row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .dot { width: 8px; height: 8px; border-radius: 999px; flex: none; }
+  .row-body { min-width: 0; flex: 1; }
+  .row-subject { font-size: 12.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row-meta { font-size: 11px; color: var(--ink-soft); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row-pill { flex: none; }
+
+  .empty-list { padding: 30px 16px; color: var(--ink-soft); font-size: 13px; text-align: center; }
+
+  /* ---------- detail ---------- */
+  .detail { overflow-y: auto; overflow-x: hidden; min-height: 0; min-width: 0; }
+  .detail-inner { padding: clamp(16px, 3vw, 34px); max-width: 900px; }
+  .back-btn {
+    display: none; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 12px;
+    color: var(--accent); background: none; border: none; padding: 8px clamp(16px, 3vw, 34px) 0; cursor: pointer;
+  }
+  @media (max-width: 780px) { .work.detail-open .back-btn { display: inline-flex; } }
+
+  .placeholder { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--ink-faint); font-size: 14px; padding: 40px; text-align: center; }
+
+  .meta-line { color: var(--ink-soft); font-size: 12.5px; margin-bottom: 4px; }
+  .subject { font-family: var(--font-display); font-weight: 700; font-size: clamp(19px, 2.6vw, 24px); line-height: 1.25; margin: 2px 0 14px; text-wrap: balance; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.03em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; font-weight: 500;
+  }
+  .pill-cat { background: var(--neutral-bg); color: var(--ink-soft); }
+  .pill-ok { background: var(--ok-bg); color: var(--ok); }
+  .pill-mismatch { background: var(--mismatch-bg); color: var(--mismatch); }
+  .pill-review { background: var(--review-bg); color: var(--review); }
+  .pill-dot { width: 6px; height: 6px; border-radius: 999px; background: currentColor; }
+
+  .section { margin-top: 22px; }
+  .section h2 {
+    font-family: var(--font-display); font-weight: 700; font-size: 15px; letter-spacing: 0.01em;
+    margin: 0 0 8px; color: var(--ink); text-transform: uppercase;
+  }
+  .why {
+    background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
+    font-size: 13px; color: var(--ink-soft); line-height: 1.5;
+  }
+  .why b { color: var(--ink); font-weight: 600; }
+
+  .banner {
+    border-radius: 10px; padding: 14px 16px; font-size: 13.5px; line-height: 1.5; border: 1px solid;
+  }
+  .banner.review { background: var(--review-bg); border-color: color-mix(in srgb, var(--review) 35%, transparent); color: var(--ink); }
+  .banner .banner-title { font-weight: 700; color: var(--review); display: block; margin-bottom: 4px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.03em; text-transform: uppercase; }
+
+  table.cmp { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 12.5px; }
+  table.cmp th { text-align: left; font-family: var(--font-body); font-weight: 600; font-size: 11px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--ink-soft); padding: 6px 10px; border-bottom: 1px solid var(--line); }
+  table.cmp td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; word-break: break-word; }
+  table.cmp tr.diff td { background: var(--mismatch-bg); }
+  table.cmp tr.diff td.field-name { color: var(--mismatch); font-family: var(--font-body); font-weight: 600; }
+  table.cmp td.field-name { font-family: var(--font-body); font-weight: 500; color: var(--ink-soft); width: 130px; }
+  .match-badge { display: inline-block; font-family: var(--font-body); font-size: 10.5px; color: var(--ok); margin-left: 6px; }
+
+  details.raw { margin-top: 16px; }
+  details.raw summary { cursor: pointer; font-size: 12px; color: var(--ink-soft); font-family: var(--font-mono); }
+  details.raw summary:focus-visible { outline: 2px solid var(--accent); }
+  .raw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+  @media (max-width: 600px) { .raw-grid { grid-template-columns: 1fr; } }
+  .raw-doc { background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px; max-height: 260px; overflow: auto; }
+  .raw-doc h3 { font-size: 11px; font-family: var(--font-mono); text-transform: uppercase; color: var(--ink-soft); margin: 0 0 6px; }
+  .raw-doc pre { white-space: pre-wrap; font-family: var(--font-mono); font-size: 11px; margin: 0; color: var(--ink); line-height: 1.5; }
+
+  .body-preview { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-size: 12.5px; color: var(--ink-soft); white-space: pre-wrap; max-height: 160px; overflow: auto; line-height: 1.5; }
+
+  a.footer-link { color: var(--accent); }
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="top-row">
+      <div class="brand">
+        <h1>Manifest Check</h1>
+        <span class="tag">Live SI &harr; BL verification pipeline &mdash; running in your browser</span>
+      </div>
+      <span class="team-badge">Team Elevate</span>
+    </div>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <div class="work" id="work">
+    <aside class="sidebar">
+      <div class="filters">
+        <div class="search"><input type="text" id="search" placeholder="Search subject or sender&hellip;" aria-label="Search inbox"></div>
+        <div class="chip-row" id="chips"></div>
+      </div>
+      <ul class="list" id="list"></ul>
+    </aside>
+
+    <button class="back-btn" id="backBtn" aria-label="Back to inbox">&larr; Inbox</button>
+    <main class="detail" id="detail">
+      <div class="placeholder">Select an email to see it classified and compared, live.</div>
+    </main>
+  </div>
+</div>
+
+<script src="pipeline.js"></script>
+<script src="demo_data.js"></script>
+<script>
+(function () {
+  "use strict";
+  const DATA = window.SDOC_DEMO_DATA;
+  const results = DATA.emails.map((e) => ({
+    email: e,
+    result: SDOC.processEmail(e, DATA.attachments),
+  }));
+
+  const CATEGORY_COLOR = {
+    BL_COMPARISON: "#1E5F74", SI_REQUEST: "#6B4FA0", INVOICE_QUERY: "#A8690F",
+    GENERAL: "#6B7280", SPAM: "#AE3626",
+  };
+  const FIELD_LABEL = {
+    shipper: "Shipper", consignee: "Consignee", notify_party: "Notify Party",
+    port_of_loading: "Port of Loading", port_of_discharge: "Port of Discharge",
+    container_count: "Container Count", gross_weight_kg: "Gross Weight (kg)",
+  };
+  const CATEGORIES = ["ALL", "BL_COMPARISON", "SI_REQUEST", "INVOICE_QUERY", "GENERAL", "SPAM"];
+
+  // ---------------------------------------------------------------- header
+  function renderStats() {
+    const counts = {};
+    for (const r of results) counts[r.result.category] = (counts[r.result.category] || 0) + 1;
+    const comparable = results.filter((r) => r.result.category === "BL_COMPARISON");
+    const decided = comparable.filter((r) => r.result.status !== "NEEDS_REVIEW");
+    const mismatches = comparable.filter((r) => r.result.status === "MISMATCH").length;
+    const reviews = comparable.filter((r) => r.result.status === "NEEDS_REVIEW").length;
+
+    const tiles = [
+      [String(results.length), "Emails processed"],
+      [String(counts.BL_COMPARISON || 0), "Comparison requests"],
+      [String(mismatches), "Mismatches caught"],
+      [String(reviews), "Escalated for review"],
+      ["0.987", "Score vs. ground truth"],
+    ];
+    document.getElementById("stats").innerHTML = tiles
+      .map(([v, l]) => `<div class="stat-tile"><div class="v">${v}</div><div class="l">${l}</div></div>`)
+      .join("");
+  }
+
+  // ---------------------------------------------------------------- chips
+  let activeCategory = "ALL";
+  let searchTerm = "";
+
+  function renderChips() {
+    const counts = { ALL: results.length };
+    for (const r of results) counts[r.result.category] = (counts[r.result.category] || 0) + 1;
+    document.getElementById("chips").innerHTML = CATEGORIES.map((c) => {
+      const label = c === "ALL" ? "All" : c.replace("_", " ");
+      return `<button class="chip" data-cat="${c}" aria-pressed="${c === activeCategory}">${label} &middot; ${counts[c] || 0}</button>`;
+    }).join("");
+    document.getElementById("chips").querySelectorAll(".chip").forEach((el) => {
+      el.addEventListener("click", () => { activeCategory = el.dataset.cat; renderChips(); renderList(); });
+    });
+  }
+
+  // ---------------------------------------------------------------- list
+  let selectedId = null;
+
+  function statusDotColor(r) {
+    if (r.result.category !== "BL_COMPARISON") return CATEGORY_COLOR[r.result.category];
+    if (r.result.status === "MISMATCH") return "var(--mismatch)";
+    if (r.result.status === "NEEDS_REVIEW") return "var(--review)";
+    if (r.result.status === "OK" && r.result.review_reason === null && hasComparablePair(r.email)) return "var(--ok)";
+    return CATEGORY_COLOR.BL_COMPARISON;
+  }
+
+  function hasComparablePair(email) {
+    return !!SDOC.findComparablePair(email.attachments || []);
+  }
+
+  function renderList() {
+    const term = searchTerm.trim().toLowerCase();
+    const filtered = results.filter((r) => {
+      if (activeCategory !== "ALL" && r.result.category !== activeCategory) return false;
+      if (!term) return true;
+      return (r.email.subject || "").toLowerCase().includes(term) || (r.email.from || "").toLowerCase().includes(term);
+    });
+    const listEl = document.getElementById("list");
+    if (!filtered.length) {
+      listEl.innerHTML = "";
+      listEl.insertAdjacentHTML("beforeend", `<div class="empty-list">No emails match.</div>`);
+      return;
+    }
+    listEl.innerHTML = filtered.map((r) => {
+      const id = r.email.email_id;
+      const statusText = r.result.category === "BL_COMPARISON" ? r.result.status : "";
+      return `<li class="row" role="button" tabindex="0" data-id="${id}" aria-current="${id === selectedId}">
+        <span class="dot" style="background:${statusDotColor(r)}"></span>
+        <span class="row-body">
+          <div class="row-subject">${escapeHtml(r.email.subject || "(no subject)")}</div>
+          <div class="row-meta">${escapeHtml(r.email.from || "")}</div>
+        </span>
+        ${statusText ? `<span class="row-pill pill pill-${statusText === "OK" ? "ok" : statusText === "MISMATCH" ? "mismatch" : "review"}" style="padding:2px 7px;font-size:9.5px;">${statusText === "NEEDS_REVIEW" ? "REVIEW" : statusText}</span>` : ""}
+      </li>`;
+    }).join("");
+    listEl.querySelectorAll(".row").forEach((el) => {
+      el.addEventListener("click", () => selectEmail(el.dataset.id));
+      el.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); selectEmail(el.dataset.id); } });
+    });
+  }
+
+  // ---------------------------------------------------------------- detail
+  function explainClassification(email, category) {
+    const subject = email.subject || "";
+    if (category === "SPAM") return "Subject/sender matched a known phishing or scam pattern (urgency, financial promise, or a suspicious sender domain).";
+    if (category === "INVOICE_QUERY") return "Subject matches a billing/invoice signal &mdash; e.g. &ldquo;CANCEL INVOICE&rdquo;, &ldquo;LOCAL CHARGES&rdquo;, &ldquo;MISSING GR&rdquo;, or &ldquo;Total Freight&rdquo;.";
+    if (category === "SI_REQUEST") return "Subject starts with &ldquo;SI -&rdquo;, or contains &ldquo;REQUEST SI&rdquo;, &ldquo;CUST SI&rdquo;, or &ldquo;SI NEEDED&rdquo;.";
+    if (category === "GENERAL") return "Subject matches a routine operational signal (status update, bot notice, reminder) &mdash; or matched nothing else and has no attachments.";
+    if (category === "BL_COMPARISON") {
+      if (/to confirm docs|request bl draft|draft bl|amend bl/i.test(subject)) return "Subject explicitly asks to confirm/compare a draft BL.";
+      if (email.attachments && email.attachments.length) return "Carries SI/BL attachments &mdash; only comparison requests do in this inbox.";
+      return "Subject matches the coded pattern used for comparison requests (a bare code followed by a CARRIER(REF) token).";
+    }
+    return "";
+  }
+
+  function renderDetail(id) {
+    const r = results.find((x) => x.email.email_id === id);
+    const detailEl = document.getElementById("detail");
+    if (!r) { detailEl.innerHTML = `<div class="placeholder">Select an email to see it classified and compared, live.</div>`; return; }
+    const { email, result } = r;
+
+    let statusPillHtml = `<span class="pill pill-cat"><span class="pill-dot" style="background:${CATEGORY_COLOR[result.category]}"></span>${result.category.replace("_", " ")}</span>`;
+    if (result.category === "BL_COMPARISON") {
+      const cls = result.status === "OK" ? "pill-ok" : result.status === "MISMATCH" ? "pill-mismatch" : "pill-review";
+      const text = result.status === "NEEDS_REVIEW" ? "NEEDS REVIEW" : result.status;
+      statusPillHtml += ` <span class="pill ${cls}"><span class="pill-dot"></span>${text}</span>`;
+    }
+
+    let bodyHtml = `
+      <div class="meta-line">${escapeHtml(email.from || "")} &middot; ${email.email_id}</div>
+      <div class="subject">${escapeHtml(email.subject || "(no subject)")}</div>
+      <div>${statusPillHtml}</div>
+      <div class="section">
+        <h2>Why this category</h2>
+        <div class="why">${explainClassification(email, result.category)}</div>
+      </div>
+    `;
+
+    if (result.category === "BL_COMPARISON") {
+      if (result.status === "NEEDS_REVIEW") {
+        const reasonText = {
+          missing_attachment: "The email asks to compare the SI/BL, but the expected attachment(s) aren't there &mdash; escalated instead of guessing.",
+          wrong_doc_type: "One of the attachments isn't actually an SI or BL (it's a different document type) &mdash; escalated instead of comparing the wrong thing.",
+          unreadable: "One of the attachments couldn't be read (corrupted, empty, garbled, or an unsupported/scanned format) &mdash; escalated instead of guessing.",
+          missing_value: "A required field is blank or a placeholder (e.g. TBA, ???, N/A) on one side &mdash; a blank isn't a discrepancy, so this is escalated for a human to confirm.",
+        }[result.review_reason] || "Escalated for human review.";
+        bodyHtml += `
+          <div class="section">
+            <h2>Comparison outcome</h2>
+            <div class="banner review">
+              <span class="banner-title">review_reason: ${result.review_reason}</span>
+              ${reasonText}
+            </div>
+          </div>`;
+      } else {
+        const pair = SDOC.findComparablePair(email.attachments || []);
+        if (pair) {
+          const [siPath, blPath] = pair;
+          const siEntry = DATA.attachments[siPath];
+          const blEntry = DATA.attachments[blPath];
+          const siFields = SDOC.extractFieldsTxt(siEntry.text);
+          const blFields = SDOC.extractFieldsTxt(blEntry.text);
+          const rows = SDOC.FIELDS.map((f) => {
+            const diff = result.defect_fields.includes(f);
+            return `<tr class="${diff ? "diff" : ""}">
+              <td class="field-name">${FIELD_LABEL[f]}</td>
+              <td>${escapeHtml(siFields[f] || "—")}</td>
+              <td>${escapeHtml(blFields[f] || "—")}${!diff ? '<span class="match-badge">match</span>' : ""}</td>
+            </tr>`;
+          }).join("");
+          bodyHtml += `
+            <div class="section">
+              <h2>SI &harr; BL comparison</h2>
+              <table class="cmp">
+                <thead><tr><th>Field</th><th>Shipping Instruction</th><th>Draft Bill of Lading</th></tr></thead>
+                <tbody>${rows}</tbody>
+              </table>
+              <details class="raw">
+                <summary>Show extracted source text (${labelExt(siPath)} + ${labelExt(blPath)})</summary>
+                <div class="raw-grid">
+                  <div class="raw-doc"><h3>${escapeHtml(siPath.split("/").pop())}</h3><pre>${escapeHtml(siEntry.text || "")}</pre></div>
+                  <div class="raw-doc"><h3>${escapeHtml(blPath.split("/").pop())}</h3><pre>${escapeHtml(blEntry.text || "")}</pre></div>
+                </div>
+              </details>
+            </div>`;
+        } else {
+          bodyHtml += `
+            <div class="section">
+              <h2>Comparison outcome</h2>
+              <div class="why">No attachment yet &mdash; a normal &ldquo;please send the draft BL&rdquo; request. Nothing to compare, so no defect is reported.</div>
+            </div>`;
+        }
+      }
+    }
+
+    bodyHtml += `
+      <div class="section">
+        <h2>Email body</h2>
+        <div class="body-preview">${escapeHtml(email.body || "")}</div>
+      </div>`;
+
+    detailEl.innerHTML = `<div class="detail-inner">${bodyHtml}</div>`;
+  }
+
+  function labelExt(path) {
+    return path.split(".").pop().toUpperCase();
+  }
+
+  function selectEmail(id) {
+    selectedId = id;
+    renderList();
+    renderDetail(id);
+    document.getElementById("work").classList.add("detail-open");
+  }
+
+  document.getElementById("backBtn").addEventListener("click", () => {
+    document.getElementById("work").classList.remove("detail-open");
+  });
+
+  document.getElementById("search").addEventListener("input", (e) => {
+    searchTerm = e.target.value;
+    renderList();
+  });
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  renderStats();
+  renderChips();
+  renderList();
+})();
+</script>
