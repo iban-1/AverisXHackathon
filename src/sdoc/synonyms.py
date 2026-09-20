@@ -54,9 +54,13 @@ LABEL_TO_FIELD = {
     "container count": "container_count",
     # gross_weight_kg
     "gross wt (kgs)": "gross_weight_kg",
+    "gross wt": "gross_weight_kg",
     "gross weight": "gross_weight_kg",
     "gross weight (kg)": "gross_weight_kg",
     "gross weight (kgs)": "gross_weight_kg",
+    "total gross wt (kgs)": "gross_weight_kg",
+    "total gross weight (kg)": "gross_weight_kg",
+    "total gross weight": "gross_weight_kg",
 }
 
 # Labels seen in the data that mark a document as NOT an SI/BL at all
@@ -86,9 +90,22 @@ def normalize_label(raw_label: str) -> str:
     return " ".join(ascii_only.strip().lower().split())
 
 
+def _normalize_label_parens_stripped(raw_label: str) -> str:
+    """Fallback for bilingual DOCX/XLSX labels where CJK text is glued
+    *inside the same parens* as an English abbreviation, e.g.
+    "Gross Wt (kgs) (毛重 KGS)" — normalize_label() alone leaves a stray
+    "( kgs)" behind. Drops every parenthetical group entirely."""
+    ascii_only = _NON_ASCII_RE.sub(" ", raw_label)
+    no_parens = re.sub(r"\([^)]*\)", " ", ascii_only)
+    return " ".join(no_parens.strip().lower().split())
+
+
 def field_for_label(raw_label: str) -> str | None:
     """Return the canonical field name for a raw document label, or None."""
-    return LABEL_TO_FIELD.get(normalize_label(raw_label))
+    field = LABEL_TO_FIELD.get(normalize_label(raw_label))
+    if field:
+        return field
+    return LABEL_TO_FIELD.get(_normalize_label_parens_stripped(raw_label))
 
 
 def is_other_doc_type_label(raw_label: str) -> bool:

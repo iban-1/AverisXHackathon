@@ -1,8 +1,7 @@
-# Stdlib-only for now (classify/extract/compare on plain text).
-# Added at M7 (PDF/DOCX/XLSX extraction):
-#   pdfplumber
-#   python-docx
-#   openpyxl
+pdfplumber
+python-docx
+openpyxl
+
 # Added at M8 (scanned/image-only PDF OCR):
 #   pytesseract
 #   pdf2image

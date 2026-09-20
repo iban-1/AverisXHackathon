@@ -1,4 +1,4 @@
-"""M5/M6: tie classify + extract + compare together into a full
+"""M5/M6/M7: tie classify + extract + compare together into a full
 submission.json, with reliability escalation for the cases the pipeline
 genuinely can't decide on its own.
 
@@ -11,7 +11,7 @@ from pathlib import Path
 
 from .classify import classify
 from .compare import compare_fields
-from .extract import extract_fields_txt, looks_like_other_doc_type
+from .extract import extract_fields, looks_like_other_doc_type
 
 # The 20 reliability edge cases explicitly ask us to *perform* a comparison
 # ("Please compare the SI and draft BL ... (attachments appear to have been
@@ -19,6 +19,9 @@ from .extract import extract_fields_txt, looks_like_other_doc_type
 # what distinguishes a genuine missing_attachment case from the ~45% of
 # ordinary BL_COMPARISON emails that simply don't have a BL yet.
 _ASKS_TO_COMPARE_RE = re.compile(r"\bcompare\b", re.IGNORECASE)
+
+_SUPPORTED_SUFFIXES = {".txt", ".pdf", ".docx", ".xlsx"}
+_SI_BL_ROLE_RE = re.compile(r"_(SI|BL)\.\w+$", re.IGNORECASE)
 
 _DEFAULT_RESULT: dict[str, object] = {
     "category": "GENERAL",
@@ -29,15 +32,38 @@ _DEFAULT_RESULT: dict[str, object] = {
 }
 
 
-def _txt_pair(attachments: list[str]):
+def _find_comparable_pair(attachments: list[str]):
     """Return (si_path, bl_path) if attachments are exactly one SI + one BL
-    .txt file, else None (0/1 attachments, or a format we don't parse yet)."""
+    file, each in a format we can parse (txt/pdf/docx/xlsx — SI and BL need
+    not share the same format, e.g. an xlsx SI with a docx BL), else None."""
     if len(attachments) != 2:
         return None
-    si = [a for a in attachments if a.endswith("_SI.txt")]
-    bl = [a for a in attachments if a.endswith("_BL.txt")]
-    if len(si) == 1 and len(bl) == 1:
-        return si[0], bl[0]
+    si_path = bl_path = None
+    for a in attachments:
+        if Path(a).suffix.lower() not in _SUPPORTED_SUFFIXES:
+            return None
+        m = _SI_BL_ROLE_RE.search(a)
+        if not m:
+            return None
+        if m.group(1).upper() == "SI":
+            si_path = a
+        else:
+            bl_path = a
+    return (si_path, bl_path) if si_path and bl_path else None
+
+
+def _raw_text_for_doc_type_check(path: Path) -> str | None:
+    """Flattened text for the wrong_doc_type header/label check — only
+    meaningful for text-bearing formats (txt/PDF); no known wrong_doc_type
+    cases use docx/xlsx in this dataset, so those are skipped."""
+    suffix = path.suffix.lower()
+    if suffix == ".txt":
+        return path.read_text(encoding="utf-8")
+    if suffix == ".pdf":
+        import pdfplumber
+
+        with pdfplumber.open(path) as pdf:
+            return "\n".join(page.extract_text() or "" for page in pdf.pages)
     return None
 
 
@@ -61,27 +87,43 @@ def process_email(email: dict, data_dir: Path) -> dict:
             result["review_reason"] = "missing_attachment"
         return result
 
-    pair = _txt_pair(attachments)
+    pair = _find_comparable_pair(attachments)
     if pair is None:
-        # Two attachments are present but not a parseable .txt SI+BL pair
-        # (PDF/DOCX/XLSX -> M7/M8 not built yet, or unexpected naming). We
-        # genuinely can't compare them -- escalate instead of silently
-        # reporting OK, which would hide any real discrepancy.
+        # Two attachments are present but not a recognizable SI+BL pair in
+        # a format we support -- escalate instead of silently reporting OK,
+        # which would hide any real discrepancy.
         result["status"] = "NEEDS_REVIEW"
         result["review_reason"] = "unreadable"
         return result
 
     si_path, bl_path = pair
-    si_text = (data_dir / si_path).read_text(encoding="utf-8")
-    bl_text = (data_dir / bl_path).read_text(encoding="utf-8")
+    si_full = data_dir / si_path
+    bl_full = data_dir / bl_path
 
-    if looks_like_other_doc_type(bl_text) or looks_like_other_doc_type(si_text):
+    try:
+        for path in (si_full, bl_full):
+            doc_text = _raw_text_for_doc_type_check(path)
+            if doc_text is not None and looks_like_other_doc_type(doc_text):
+                result["status"] = "NEEDS_REVIEW"
+                result["review_reason"] = "wrong_doc_type"
+                return result
+
+        si_fields = extract_fields(si_full)
+        bl_fields = extract_fields(bl_full)
+    except Exception:
+        # Garbled/truncated/corrupt file (e.g. no /Root object in a PDF).
         result["status"] = "NEEDS_REVIEW"
-        result["review_reason"] = "wrong_doc_type"
+        result["review_reason"] = "unreadable"
         return result
 
-    si_fields = extract_fields_txt(si_text)
-    bl_fields = extract_fields_txt(bl_text)
+    if not si_fields or not bl_fields:
+        # Nothing at all was extracted from one side -- most likely a
+        # scanned/image-only document with no text layer (needs OCR, M8),
+        # not a document that just happens to have every field blank.
+        result["status"] = "NEEDS_REVIEW"
+        result["review_reason"] = "unreadable"
+        return result
+
     result.update(compare_fields(si_fields, bl_fields))
     return result
 
