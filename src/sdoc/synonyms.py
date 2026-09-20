@@ -5,6 +5,7 @@ files in the participant dataset (data/) and clustering the distinct labels
 by meaning. Same list applies to PDF/DOCX/XLSX once those extractors land
 (M7) since the renderer reuses these labels regardless of file format.
 """
+import re
 
 # The 7 fields the comparison covers.
 FIELDS = [
@@ -55,6 +56,7 @@ LABEL_TO_FIELD = {
     "gross wt (kgs)": "gross_weight_kg",
     "gross weight": "gross_weight_kg",
     "gross weight (kg)": "gross_weight_kg",
+    "gross weight (kgs)": "gross_weight_kg",
 }
 
 # Labels seen in the data that mark a document as NOT an SI/BL at all
@@ -72,8 +74,16 @@ OTHER_DOC_TYPE_LABELS = {
 }
 
 
+_NON_ASCII_RE = re.compile(r"[^\x00-\x7F]+")
+
+
 def normalize_label(raw_label: str) -> str:
-    return " ".join(raw_label.strip().lower().split())
+    # Some documents mix in CJK characters right before the value, e.g.
+    # "Gross Weight毛重(KGS)" — drop anything outside ASCII before matching,
+    # and make sure dropping them didn't glue "(KGS)" onto the previous word.
+    ascii_only = _NON_ASCII_RE.sub(" ", raw_label)
+    ascii_only = re.sub(r"(?<=[A-Za-z])\(", " (", ascii_only)
+    return " ".join(ascii_only.strip().lower().split())
 
 
 def field_for_label(raw_label: str) -> str | None:
