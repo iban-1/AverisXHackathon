@@ -94,6 +94,15 @@
     font-family: var(--font-body); font-size: 13px; background: var(--surface-2); color: var(--ink);
   }
   .search input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .overview-link {
+    display: none; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 11.5px;
+    letter-spacing: 0.02em; color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent);
+    border-radius: 8px; padding: 7px 10px; cursor: pointer; text-align: left; width: 100%;
+  }
+  .overview-link.visible { display: flex; }
+  .overview-link:hover { background: var(--accent); color: white; }
+  .overview-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
   .chip-row { display: flex; gap: 6px; flex-wrap: wrap; }
   .chip {
     font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.02em; border-radius: 999px;
@@ -243,6 +252,7 @@
   <div class="work" id="work">
     <aside class="sidebar">
       <div class="filters">
+        <button class="overview-link" id="overviewBtn" type="button">&larr; Overview</button>
         <div class="search"><input type="text" id="search" placeholder="Search subject or sender&hellip;" aria-label="Search inbox"></div>
         <div class="chip-row" id="chips"></div>
       </div>
@@ -528,11 +538,14 @@
     return path.split(".").pop().toUpperCase();
   }
 
+  const overviewBtn = document.getElementById("overviewBtn");
+
   function selectEmail(id) {
     selectedId = id;
     renderList();
     renderDetail(id);
     document.getElementById("work").classList.add("detail-open");
+    overviewBtn.classList.add("visible");
   }
 
   document.getElementById("backBtn").addEventListener("click", () => {
@@ -546,10 +559,12 @@
     // Landing lives in the "detail" pane -- keep it showing (not the bare
     // sidebar) even at mobile width.
     document.getElementById("work").classList.add("detail-open");
+    overviewBtn.classList.remove("visible");
   }
   const brandTitle = document.getElementById("brandTitle");
   brandTitle.addEventListener("click", goHome);
   brandTitle.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); goHome(); } });
+  overviewBtn.addEventListener("click", goHome);
 
   document.getElementById("search").addEventListener("input", (e) => {
     searchTerm = e.target.value;
