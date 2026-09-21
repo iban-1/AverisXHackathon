@@ -351,7 +351,7 @@
   @media (min-width: 768px) { .h-wordmark { font-size: 21px; } }
   .h-links { display: none; align-items: center; gap: 40px; }
   @media (min-width: 1024px) { .h-links { display: flex; } }
-  .h-navitem { display: flex; align-items: center; gap: 3px; }
+  .h-navitem { display: flex; align-items: center; gap: 3px; cursor: pointer; }
   .h-navitem .num { font-family: var(--h-font); color: color-mix(in srgb, var(--h-accent) 80%, transparent); font-size: 13px; line-height: 15.6px; }
   .h-navitem .lab { font-family: var(--h-font); color: #fff; font-size: 13px; line-height: 15.6px; cursor: pointer; transition: color 200ms var(--h-ease-out); }
   .h-navitem .lab:hover { color: var(--h-accent); }
@@ -381,7 +381,7 @@
   .h-mmenu-close { position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; color: #fff; }
   .h-mmenu-close svg { width: 22px; height: 22px; }
   .h-mmenu-list { display: flex; flex-direction: column; gap: 32px; }
-  .h-mmenu-row { display: flex; align-items: center; gap: 12px; opacity: 0; transform: translateX(-24px); transition: all 500ms var(--h-ease-io); }
+  .h-mmenu-row { display: flex; align-items: center; gap: 12px; cursor: pointer; opacity: 0; transform: translateX(-24px); transition: all 500ms var(--h-ease-io); }
   .h-mmenu.open .h-mmenu-row { opacity: 1; transform: translateX(0); }
   .h-mmenu-row .num { font-family: var(--h-font); color: color-mix(in srgb, var(--h-accent) 80%, transparent); font-size: 14px; }
   .h-mmenu-row .lab { font-family: var(--h-font); color: #fff; font-size: 28px; line-height: 1.2; letter-spacing: -0.01em; }
@@ -430,10 +430,13 @@
   @keyframes hBlobSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   @keyframes hBlobPulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 0.65; transform: scale(1.08); } }
   @media (prefers-reduced-motion: reduce) { .h-glow-outer, .h-glow-core { animation: none !important; } }
-  .h-node-label .title { font-family: var(--h-font); color: #fff; font-size: 13px; line-height: 15.6px; white-space: nowrap; }
+  .h-node-label { pointer-events: auto; cursor: pointer; }
+  .h-node-label .title { font-family: var(--h-font); color: #fff; font-size: 13px; line-height: 15.6px; white-space: nowrap; transition: color 200ms var(--h-ease-out); }
+  .h-node-label:hover .title { color: var(--h-accent); }
   .h-node-label p { font-family: var(--h-font); color: var(--h-muted); font-size: 11px; line-height: 14px; margin-top: 4px; }
 
-  .h-bottom { position: absolute; left: 20px; right: 20px; bottom: 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 20px; }
+  .h-bottom { position: absolute; left: 20px; right: 20px; bottom: 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 20px; pointer-events: none; }
+  .h-bottom > * { pointer-events: auto; }
   @media (min-width: 768px) { .h-bottom { left: 35px; right: 35px; bottom: 35px; flex-direction: row; align-items: flex-end; justify-content: space-between; gap: 0; } }
 
   .h-cta { background: var(--h-accent); border: none; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px 16px; transition: background-color 200ms var(--h-ease-out), transform 140ms var(--h-ease-out); }
@@ -466,11 +469,11 @@
       <div class="h-left">
         <span class="h-wordmark h-fade-up" style="animation-delay:200ms">MANIFEST CHECK</span>
         <div class="h-links">
-          <div class="h-navitem h-fade-up" style="animation-delay:350ms"><span class="num">01.</span><span class="lab">BL_COMPARISON</span></div>
-          <div class="h-navitem h-fade-up" style="animation-delay:430ms"><span class="num">02.</span><span class="lab">SI_REQUEST</span></div>
-          <div class="h-navitem h-fade-up" style="animation-delay:510ms"><span class="num">03.</span><span class="lab">INVOICE_QUERY</span></div>
-          <div class="h-navitem h-fade-up" style="animation-delay:590ms"><span class="num">04.</span><span class="lab">GENERAL</span></div>
-          <div class="h-navitem h-fade-up" style="animation-delay:670ms"><span class="num">05.</span><span class="lab">SPAM</span></div>
+          <div class="h-navitem h-fade-up" data-cat="BL_COMPARISON" style="animation-delay:350ms"><span class="num">01.</span><span class="lab">BL_COMPARISON</span></div>
+          <div class="h-navitem h-fade-up" data-cat="SI_REQUEST" style="animation-delay:430ms"><span class="num">02.</span><span class="lab">SI_REQUEST</span></div>
+          <div class="h-navitem h-fade-up" data-cat="INVOICE_QUERY" style="animation-delay:510ms"><span class="num">03.</span><span class="lab">INVOICE_QUERY</span></div>
+          <div class="h-navitem h-fade-up" data-cat="GENERAL" style="animation-delay:590ms"><span class="num">04.</span><span class="lab">GENERAL</span></div>
+          <div class="h-navitem h-fade-up" data-cat="SPAM" style="animation-delay:670ms"><span class="num">05.</span><span class="lab">SPAM</span></div>
         </div>
       </div>
       <div class="h-right h-slide-right" style="animation-delay:600ms">
@@ -493,11 +496,11 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
         <div class="h-mmenu-list">
-          <div class="h-mmenu-row" style="transition-delay:150ms"><span class="num">01.</span><span class="lab">BL_COMPARISON</span></div>
-          <div class="h-mmenu-row" style="transition-delay:210ms"><span class="num">02.</span><span class="lab">SI_REQUEST</span></div>
-          <div class="h-mmenu-row" style="transition-delay:270ms"><span class="num">03.</span><span class="lab">INVOICE_QUERY</span></div>
-          <div class="h-mmenu-row" style="transition-delay:330ms"><span class="num">04.</span><span class="lab">GENERAL</span></div>
-          <div class="h-mmenu-row" style="transition-delay:390ms"><span class="num">05.</span><span class="lab">SPAM</span></div>
+          <div class="h-mmenu-row" data-cat="BL_COMPARISON" style="transition-delay:150ms"><span class="num">01.</span><span class="lab">BL_COMPARISON</span></div>
+          <div class="h-mmenu-row" data-cat="SI_REQUEST" style="transition-delay:210ms"><span class="num">02.</span><span class="lab">SI_REQUEST</span></div>
+          <div class="h-mmenu-row" data-cat="INVOICE_QUERY" style="transition-delay:270ms"><span class="num">03.</span><span class="lab">INVOICE_QUERY</span></div>
+          <div class="h-mmenu-row" data-cat="GENERAL" style="transition-delay:330ms"><span class="num">04.</span><span class="lab">GENERAL</span></div>
+          <div class="h-mmenu-row" data-cat="SPAM" style="transition-delay:390ms"><span class="num">05.</span><span class="lab">SPAM</span></div>
         </div>
         <div class="h-mmenu-wallet" style="transition-delay:460ms">
           <div class="row1">
@@ -901,6 +904,19 @@
     return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   }
 
+  // Lets the hero's nav items / node labels jump straight into the app
+  // pre-filtered to a category, instead of always landing on the bare
+  // overview -- the same filter a chip click applies.
+  window.SDOC_filterApp = function filterApp(category) {
+    activeCategory = category;
+    renderChips();
+    staggerNextRender = true;
+    renderList();
+    selectedId = null;
+    renderLanding();
+    document.getElementById("work").classList.remove("detail-open");
+  };
+
   renderStats();
   renderChips();
   renderList();
@@ -939,9 +955,9 @@
 
   // ---- central nodes + connectors ----
   const NODES = [
-    { sq: { top: "27%", left: "60%" }, sqDelay: 1500, label: { top: "11%", left: "26%" }, anim: "h-slide-left", labelDelay: 1100, title: "[ CLASSIFY ]", desc: "Reads the subject line and sorts every email into one of five categories.", maxw: "160px" },
-    { sq: { top: "58%", left: "32%" }, sqDelay: 1800, label: { top: "76%", left: "3%" }, anim: "h-slide-left", labelDelay: 1400, title: "[ EXTRACT ]", desc: "Pulls seven shipment fields from SI and BL attachments, resolving label differences.", maxw: "160px" },
-    { sq: { top: "63%", left: "50%" }, sqDelay: 2100, label: { top: "50%", left: "78%" }, anim: "h-slide-right", labelDelay: 1700, title: "[ COMPARE ]", desc: "Flags real discrepancies, escalating anything it can't confidently decide.", maxw: "180px" },
+    { sq: { top: "27%", left: "60%" }, sqDelay: 1500, label: { top: "11%", left: "26%" }, anim: "h-slide-left", labelDelay: 1100, title: "[ BL_COMPARISON ]", desc: "Checks a draft Bill of Lading against its Shipping Instruction, field by field.", maxw: "170px", cat: "BL_COMPARISON" },
+    { sq: { top: "58%", left: "32%" }, sqDelay: 1800, label: { top: "76%", left: "3%" }, anim: "h-slide-left", labelDelay: 1400, title: "[ SI_REQUEST ]", desc: "A request to prepare a new Shipping Instruction — no comparison needed.", maxw: "160px", cat: "SI_REQUEST" },
+    { sq: { top: "63%", left: "50%" }, sqDelay: 2100, label: { top: "50%", left: "78%" }, anim: "h-slide-right", labelDelay: 1700, title: "[ INVOICE_QUERY ]", desc: "Billing questions — charges, cancellations, missing paperwork.", maxw: "170px", cat: "INVOICE_QUERY" },
   ];
   const CONNECTORS = [
     { x1: "38%", y1: "14%", x2: "52%", y2: "14%", delay: 1200 },
@@ -964,12 +980,15 @@
       <div class="h-glow-core"></div>
     </div>`;
     nodesHtml += `<div class="h-node-sq h-scale-in" style="top:${n.sq.top};left:${n.sq.left};animation-delay:${n.sqDelay}ms"></div>`;
-    nodesHtml += `<div class="h-node-label ${n.anim}" style="position:absolute;top:${n.label.top};left:${n.label.left};animation-delay:${n.labelDelay}ms">
+    nodesHtml += `<div class="h-node-label ${n.anim}" data-cat="${n.cat}" style="position:absolute;top:${n.label.top};left:${n.label.left};animation-delay:${n.labelDelay}ms">
       <span class="title">${n.title}</span>
       <p style="max-width:${n.maxw}">${n.desc}</p>
     </div>`;
   });
   nodesEl.innerHTML = nodesHtml;
+  nodesEl.querySelectorAll("[data-cat]").forEach((el) => {
+    el.addEventListener("click", () => enterAppFiltered(el.dataset.cat));
+  });
 
   // ---- mobile menu ----
   const burger = document.getElementById("hBurger");
@@ -982,14 +1001,22 @@
   document.getElementById("hMmenuClose").addEventListener("click", () => setMenu(false));
   document.getElementById("hMmenuBackdrop").addEventListener("click", () => setMenu(false));
 
-  // ---- CTA: transition hero -> app ----
+  // ---- transition hero -> app, optionally pre-filtered to a category ----
   const hero = document.getElementById("hero");
   const appRoot = document.getElementById("appRoot");
-  document.getElementById("hCta").addEventListener("click", () => {
+  function enterApp() {
     setMenu(false);
     hero.classList.add("hero-exit");
     appRoot.classList.remove("app-hidden");
     hero.addEventListener("transitionend", () => { hero.style.display = "none"; }, { once: true });
+  }
+  function enterAppFiltered(category) {
+    if (window.SDOC_filterApp) window.SDOC_filterApp(category);
+    enterApp();
+  }
+  document.getElementById("hCta").addEventListener("click", enterApp);
+  document.querySelectorAll(".h-navitem[data-cat], .h-mmenu-row[data-cat]").forEach((el) => {
+    el.addEventListener("click", () => enterAppFiltered(el.dataset.cat));
   });
 
   // ---- replay: bring the hero back (e.g. from the app's logo click) and
