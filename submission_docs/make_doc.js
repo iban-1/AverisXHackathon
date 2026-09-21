@@ -112,6 +112,10 @@ const doc = new Document({
         p("Solution: A fully rule-based pipeline that (1) classifies every inbox email into 5 categories from its coded subject line, (2) extracts the 7 shipment fields from SI/BL attachments across 4 formats (TXT, PDF, DOCX, XLSX) using a label-synonym dictionary that resolves naming inconsistencies, (3) compares values with format-aware normalization, and (4) escalates to human review — with a specific reason — whenever it cannot confidently decide, rather than guessing."),
         p("GitHub: https://github.com/iban-1/AverisXHackathon", { color: GREY }),
 
+        h1("AI & Cloud Integration"),
+        boldLabel("AI Integration: ", "this solution was built end-to-end using Claude Code, Anthropic's AI coding agent, as the core development tool — not a peripheral aid. Every module (classify.py, extract.py, synonyms.py, compare.py, pipeline.py), the 40-test suite validated against the real dataset, the JavaScript port of the pipeline powering the live demo, and this documentation were designed, implemented, debugged, and iterated end-to-end through an AI-assisted engineering workflow."),
+        boldLabel("Cloud Infrastructure: ", "the project is hosted and deployed on cloud infrastructure throughout — source control on GitHub (cloud-hosted git), and the live prototype served via GitHub Pages (GitHub's cloud hosting/CDN) at https://iban-1.github.io/AverisXHackathon/, publicly accessible with no local server required."),
+
         h1("Results"),
         new Table({
           columnWidths: [2340, 2340, 2340, 2340],

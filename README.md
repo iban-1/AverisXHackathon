@@ -14,6 +14,22 @@ Fully rule-based / deterministic — no LLM, no paid API, no network calls.
 recall 1.0). See [Known limitations](#known-limitations) for the 3 emails
 that don't match exactly and why.
 
+## AI & Cloud
+
+- **AI Integration**: built end-to-end using [Claude Code](https://claude.com/claude-code),
+  Anthropic's AI coding agent, as the core development tool. Every module
+  (`classify.py`, `extract.py`, `synonyms.py`, `compare.py`, `pipeline.py`),
+  the 40-test suite (validated against the real dataset throughout, not
+  written after the fact), the JavaScript port of the pipeline powering the
+  live demo, and this documentation were designed, implemented, debugged,
+  and iterated end-to-end through an AI-assisted engineering workflow. The
+  runtime pipeline itself is deliberately rule-based (see below) — the AI
+  integration here is in how the system was *built*.
+- **Cloud Infrastructure**: hosted and deployed on GitHub (cloud-hosted git)
+  and served via [GitHub Pages](https://iban-1.github.io/AverisXHackathon/)
+  (GitHub's cloud hosting/CDN) — the live prototype is publicly accessible
+  with no local server required.
+
 ## Approach
 
 1. **Classify** (`src/sdoc/classify.py`) — regex/keyword rules on the
@@ -118,6 +134,8 @@ python score_cli.py ../../submission.json --json
   dispatch (`extract_fields`) is structured so a Tesseract-based
   `extract_fields_scanned_pdf` could be added as another branch if needed
   for other data.
-- **No LLM/paid API anywhere** — by design (see project history). Every
+- **No LLM/paid API at runtime** — by design (see project history). Every
   capability (label-synonym matching, category classification, doc-type
-  detection) is rule-based.
+  detection) is rule-based. AI was used to *build* the system (see
+  [AI & Cloud](#ai--cloud) above), not to run it — this was a deliberate
+  cost/reliability choice, not a gap.
