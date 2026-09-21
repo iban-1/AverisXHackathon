@@ -27,6 +27,7 @@
     --shadow-2: 0 1px 1px rgba(23,25,28,0.04), 0 12px 28px -10px rgba(23,25,28,0.16);
     --inset-hi: inset 0 1px 0 rgba(255,255,255,0.7);
     --glow: none;
+    --grid: none;
     --font-display: "Big Shoulders Display", sans-serif;
     --font-body: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -35,33 +36,35 @@
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #0C0F13; --surface: #12161C; --surface-2: #171C23;
+      --bg: #000000; --surface: #0E1116; --surface-2: #12161C;
       --ink: #EEF0F2; --ink-soft: #9AA2AC; --ink-faint: #5F6670;
-      --accent: #6FC1D6; --accent-soft: #16262B; --on-accent: #0A1D24;
-      --line: rgba(255, 255, 255, 0.09); --line-soft: rgba(255, 255, 255, 0.05);
+      --accent: #AFDDFF; --accent-soft: #16262B; --on-accent: #06181F;
+      --line: rgba(255, 255, 255, 0.09); --line-soft: rgba(255, 255, 255, 0.045);
       --ok: #6FCB94; --ok-bg: #132A1E;
       --mismatch: #E6897A; --mismatch-bg: #2E1A17;
       --review: #E3B368; --review-bg: #2A2013;
-      --neutral-bg: #1B2028;
+      --neutral-bg: #191D24;
       --shadow-1: 0 1px 1px rgba(0,0,0,0.4), 0 2px 8px -2px rgba(0,0,0,0.5);
       --shadow-2: 0 1px 1px rgba(0,0,0,0.4), 0 20px 44px -14px rgba(0,0,0,0.65);
       --inset-hi: inset 0 1px 0 rgba(255,255,255,0.05);
-      --glow: radial-gradient(60% 140% at 12% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%);
+      --glow: radial-gradient(60% 140% at 12% 0%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%);
+      --grid: linear-gradient(var(--line-soft) 1px, transparent 1px), linear-gradient(to right, var(--line-soft) 1px, transparent 1px);
     }
   }
   :root[data-theme="dark"] {
-    --bg: #0C0F13; --surface: #12161C; --surface-2: #171C23;
+    --bg: #000000; --surface: #0E1116; --surface-2: #12161C;
     --ink: #EEF0F2; --ink-soft: #9AA2AC; --ink-faint: #5F6670;
-    --accent: #6FC1D6; --accent-soft: #16262B; --on-accent: #0A1D24;
-    --line: rgba(255, 255, 255, 0.09); --line-soft: rgba(255, 255, 255, 0.05);
+    --accent: #AFDDFF; --accent-soft: #16262B; --on-accent: #06181F;
+    --line: rgba(255, 255, 255, 0.09); --line-soft: rgba(255, 255, 255, 0.045);
     --ok: #6FCB94; --ok-bg: #132A1E;
     --mismatch: #E6897A; --mismatch-bg: #2E1A17;
     --review: #E3B368; --review-bg: #2A2013;
-    --neutral-bg: #1B2028;
+    --neutral-bg: #191D24;
     --shadow-1: 0 1px 1px rgba(0,0,0,0.4), 0 2px 8px -2px rgba(0,0,0,0.5);
     --shadow-2: 0 1px 1px rgba(0,0,0,0.4), 0 20px 44px -14px rgba(0,0,0,0.65);
     --inset-hi: inset 0 1px 0 rgba(255,255,255,0.05);
-    --glow: radial-gradient(60% 140% at 12% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%);
+    --glow: radial-gradient(60% 140% at 12% 0%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%);
+    --grid: linear-gradient(var(--line-soft) 1px, transparent 1px), linear-gradient(to right, var(--line-soft) 1px, transparent 1px);
   }
 
   * { box-sizing: border-box; }
@@ -177,7 +180,7 @@
   .empty-list { padding: 30px 16px; color: var(--ink-soft); font-size: 13px; text-align: center; }
 
   /* ---------- detail ---------- */
-  .detail { overflow-y: auto; overflow-x: hidden; min-height: 0; min-width: 0; }
+  .detail { overflow-y: auto; overflow-x: hidden; min-height: 0; min-width: 0; background-image: var(--grid); background-size: 64px 64px; }
   .detail-inner { padding: clamp(18px, 3vw, 38px); max-width: 900px; animation: contentIn 340ms var(--ease-out) both; }
   .back-btn {
     display: none; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 12px;
@@ -463,10 +466,11 @@
       <div class="h-left">
         <span class="h-wordmark h-fade-up" style="animation-delay:200ms">MANIFEST CHECK</span>
         <div class="h-links">
-          <div class="h-navitem h-fade-up" style="animation-delay:350ms"><span class="num">01.</span><span class="lab">CLASSIFY</span></div>
-          <div class="h-navitem h-fade-up" style="animation-delay:450ms"><span class="num">02.</span><span class="lab">EXTRACT</span></div>
-          <div class="h-navitem h-fade-up" style="animation-delay:550ms"><span class="num">03.</span><span class="lab">COMPARE</span></div>
-          <div class="h-navitem h-fade-up" style="animation-delay:650ms"><span class="num">04.</span><span class="lab">ESCALATE</span></div>
+          <div class="h-navitem h-fade-up" style="animation-delay:350ms"><span class="num">01.</span><span class="lab">BL_COMPARISON</span></div>
+          <div class="h-navitem h-fade-up" style="animation-delay:430ms"><span class="num">02.</span><span class="lab">SI_REQUEST</span></div>
+          <div class="h-navitem h-fade-up" style="animation-delay:510ms"><span class="num">03.</span><span class="lab">INVOICE_QUERY</span></div>
+          <div class="h-navitem h-fade-up" style="animation-delay:590ms"><span class="num">04.</span><span class="lab">GENERAL</span></div>
+          <div class="h-navitem h-fade-up" style="animation-delay:670ms"><span class="num">05.</span><span class="lab">SPAM</span></div>
         </div>
       </div>
       <div class="h-right h-slide-right" style="animation-delay:600ms">
@@ -489,12 +493,13 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
         <div class="h-mmenu-list">
-          <div class="h-mmenu-row" style="transition-delay:150ms"><span class="num">01.</span><span class="lab">CLASSIFY</span></div>
-          <div class="h-mmenu-row" style="transition-delay:225ms"><span class="num">02.</span><span class="lab">EXTRACT</span></div>
-          <div class="h-mmenu-row" style="transition-delay:300ms"><span class="num">03.</span><span class="lab">COMPARE</span></div>
-          <div class="h-mmenu-row" style="transition-delay:375ms"><span class="num">04.</span><span class="lab">ESCALATE</span></div>
+          <div class="h-mmenu-row" style="transition-delay:150ms"><span class="num">01.</span><span class="lab">BL_COMPARISON</span></div>
+          <div class="h-mmenu-row" style="transition-delay:210ms"><span class="num">02.</span><span class="lab">SI_REQUEST</span></div>
+          <div class="h-mmenu-row" style="transition-delay:270ms"><span class="num">03.</span><span class="lab">INVOICE_QUERY</span></div>
+          <div class="h-mmenu-row" style="transition-delay:330ms"><span class="num">04.</span><span class="lab">GENERAL</span></div>
+          <div class="h-mmenu-row" style="transition-delay:390ms"><span class="num">05.</span><span class="lab">SPAM</span></div>
         </div>
-        <div class="h-mmenu-wallet" style="transition-delay:450ms">
+        <div class="h-mmenu-wallet" style="transition-delay:460ms">
           <div class="row1">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>
             <span>520 EMAILS</span>
