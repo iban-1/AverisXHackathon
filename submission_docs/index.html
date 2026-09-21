@@ -274,6 +274,10 @@
   table.cmp td { padding: 10px 11px; border-bottom: 1px solid var(--line-soft); vertical-align: top; word-break: break-word; transition: background-color 200ms var(--ease-out); }
   table.cmp tr.diff td { background: var(--mismatch-bg); position: relative; }
   table.cmp tr.diff td.field-name { color: var(--mismatch); font-family: var(--font-body); font-weight: 600; box-shadow: inset 3px 0 0 var(--mismatch); }
+  @keyframes cmpRowIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }
+  table.cmp tr.cmp-row-in { animation: cmpRowIn 260ms var(--ease-out) backwards; }
+  @keyframes flashIn { 0% { background: color-mix(in srgb, var(--mismatch) 45%, var(--mismatch-bg)); } 100% { background: var(--mismatch-bg); } }
+  table.cmp tr.flash-in td { animation: flashIn 900ms var(--ease-out) backwards; animation-delay: inherit; }
   table.cmp td.field-name { font-family: var(--font-body); font-weight: 500; color: var(--ink-soft); width: 132px; }
   .match-badge { display: inline-block; font-family: var(--font-body); font-size: 11px; color: var(--ok); margin-left: 6px; }
 
@@ -396,8 +400,33 @@
 
   .h-nodes { position: absolute; inset: 0; pointer-events: none; display: none; }
   @media (min-width: 768px) { .h-nodes { display: block; } }
-  .h-node-sq { position: absolute; width: 80px; height: 80px; border: 1px solid var(--h-node-border); }
+  .h-node-sq { position: absolute; width: 80px; height: 80px; border: 1px solid var(--h-node-border); z-index: 2; }
   @media (min-width: 1024px) { .h-node-sq { width: 100px; height: 100px; } }
+
+  /* Organic "living" glow behind each node -- a CSS/SVG approximation of
+     flowing, alive motion (not literal generated artwork). Two blurred
+     blob layers per node: a slow morphing outer glow + a brighter,
+     faster-pulsing core, both animating only transform/border-radius/
+     opacity (GPU-safe). */
+  .h-node-glow { position: absolute; width: 170px; height: 170px; transform: translate(-50%, -50%); pointer-events: none; z-index: 1; }
+  @media (min-width: 1024px) { .h-node-glow { width: 210px; height: 210px; } }
+  .h-glow-outer, .h-glow-core {
+    position: absolute; inset: 0; border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%;
+    background: radial-gradient(circle at 40% 35%, var(--h-accent), transparent 68%);
+  }
+  .h-glow-outer { filter: blur(34px); opacity: 0.22; animation: hBlobMorphA 13s ease-in-out infinite alternate, hBlobSpin 46s linear infinite; }
+  .h-glow-core { inset: 30%; filter: blur(18px); opacity: 0.5; background: radial-gradient(circle at 45% 40%, #fff, var(--h-accent) 55%, transparent 75%); animation: hBlobMorphB 7s ease-in-out infinite alternate, hBlobPulse 4.5s ease-in-out infinite; }
+  @keyframes hBlobMorphA {
+    from { border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%; }
+    to   { border-radius: 60% 40% 34% 66% / 55% 62% 38% 45%; }
+  }
+  @keyframes hBlobMorphB {
+    from { border-radius: 48% 52% 40% 60% / 60% 45% 55% 40%; }
+    to   { border-radius: 58% 42% 62% 38% / 42% 58% 42% 58%; }
+  }
+  @keyframes hBlobSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes hBlobPulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 0.65; transform: scale(1.08); } }
+  @media (prefers-reduced-motion: reduce) { .h-glow-outer, .h-glow-core { animation: none !important; } }
   .h-node-label .title { font-family: var(--h-font); color: #fff; font-size: 13px; line-height: 15.6px; white-space: nowrap; }
   .h-node-label p { font-family: var(--h-font); color: var(--h-muted); font-size: 11px; line-height: 14px; margin-top: 4px; }
 
@@ -585,7 +614,15 @@
       return `<button class="chip" data-cat="${c}" aria-pressed="${c === activeCategory}">${label} &middot; ${counts[c] || 0}</button>`;
     }).join("");
     document.getElementById("chips").querySelectorAll(".chip").forEach((el) => {
-      el.addEventListener("click", () => { activeCategory = el.dataset.cat; renderChips(); renderList(); });
+      el.addEventListener("click", () => {
+        activeCategory = el.dataset.cat;
+        renderChips();
+        // A chip click is a deliberate, occasional action (unlike a search
+        // keystroke, which fires dozens of times a session) -- worth a
+        // brief staggered re-entrance so the filtered result feels alive.
+        staggerNextRender = true;
+        renderList();
+      });
     });
   }
 
@@ -604,13 +641,15 @@
     return !!SDOC.findComparablePair(email.attachments || []);
   }
 
-  // Stagger the entrance only on the very first paint -- re-staggering on
-  // every filter/search keystroke would be an animation the user sees
-  // dozens of times a session, which should never animate (see the
+  // Stagger the entrance on first paint, and again on a deliberate, occasional
+  // action (a chip click) -- but never on a search keystroke, which fires
+  // dozens of times a session and should never animate (see the
   // emil-design-eng "should this animate at all" frequency rule).
-  let isFirstListRender = true;
+  let staggerNextRender = true;
 
   function renderList() {
+    const shouldStagger = staggerNextRender;
+    staggerNextRender = false;
     const term = searchTerm.trim().toLowerCase();
     const filtered = results.filter((r) => {
       if (activeCategory !== "ALL" && r.result.category !== activeCategory) return false;
@@ -618,17 +657,16 @@
       return (r.email.subject || "").toLowerCase().includes(term) || (r.email.from || "").toLowerCase().includes(term);
     });
     const listEl = document.getElementById("list");
-    listEl.classList.toggle("stagger-in", isFirstListRender);
+    listEl.classList.toggle("stagger-in", shouldStagger);
     if (!filtered.length) {
       listEl.innerHTML = "";
       listEl.insertAdjacentHTML("beforeend", `<div class="empty-list">No emails match.</div>`);
-      isFirstListRender = false;
       return;
     }
     listEl.innerHTML = filtered.map((r, i) => {
       const id = r.email.email_id;
       const statusText = r.result.category === "BL_COMPARISON" ? r.result.status : "";
-      const styleAttr = isFirstListRender ? ` style="--i:${Math.min(i, 18)}"` : "";
+      const styleAttr = shouldStagger ? ` style="--i:${Math.min(i, 18)}"` : "";
       return `<li class="row" role="button" tabindex="0" data-id="${id}" aria-current="${id === selectedId}"${styleAttr}>
         <span class="dot" style="background:${statusDotColor(r)}"></span>
         <span class="row-body">
@@ -642,7 +680,6 @@
       el.addEventListener("click", () => selectEmail(el.dataset.id));
       el.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); selectEmail(el.dataset.id); } });
     });
-    isFirstListRender = false;
   }
 
   // ---------------------------------------------------------------- detail
@@ -768,9 +805,9 @@
           const blEntry = DATA.attachments[blPath];
           const siFields = SDOC.extractFieldsTxt(siEntry.text);
           const blFields = SDOC.extractFieldsTxt(blEntry.text);
-          const rows = SDOC.FIELDS.map((f) => {
+          const rows = SDOC.FIELDS.map((f, i) => {
             const diff = result.defect_fields.includes(f);
-            return `<tr class="${diff ? "diff" : ""}">
+            return `<tr class="cmp-row-in ${diff ? "diff flash-in" : ""}" style="animation-delay:${i * 40}ms">
               <td class="field-name">${FIELD_LABEL[f]}</td>
               <td>${escapeHtml(siFields[f] || "—")}</td>
               <td>${escapeHtml(blFields[f] || "—")}${!diff ? '<span class="match-badge">match</span>' : ""}</td>
@@ -837,9 +874,17 @@
     document.getElementById("work").classList.add("detail-open");
     overviewBtn.classList.remove("visible");
   }
+  // Clicking the big wordmark replays the full cinematic hero (the
+  // "one-time intro" was a real gap -- this makes it re-enterable); the
+  // small sidebar Overview link stays a lighter, faster return to the
+  // in-app landing panel without leaving the tool.
+  function backToStart() {
+    goHome();
+    if (window.SDOC_showHero) window.SDOC_showHero();
+  }
   const brandTitle = document.getElementById("brandTitle");
-  brandTitle.addEventListener("click", goHome);
-  brandTitle.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); goHome(); } });
+  brandTitle.addEventListener("click", backToStart);
+  brandTitle.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); backToStart(); } });
   overviewBtn.addEventListener("click", goHome);
 
   document.getElementById("search").addEventListener("input", (e) => {
@@ -909,6 +954,10 @@
     </svg>`;
   });
   NODES.forEach((n) => {
+    nodesHtml += `<div class="h-node-glow h-fade-in" style="top:calc(${n.sq.top} + 40px);left:calc(${n.sq.left} + 40px);animation-delay:${n.sqDelay}ms">
+      <div class="h-glow-outer"></div>
+      <div class="h-glow-core"></div>
+    </div>`;
     nodesHtml += `<div class="h-node-sq h-scale-in" style="top:${n.sq.top};left:${n.sq.left};animation-delay:${n.sqDelay}ms"></div>`;
     nodesHtml += `<div class="h-node-label ${n.anim}" style="position:absolute;top:${n.label.top};left:${n.label.left};animation-delay:${n.labelDelay}ms">
       <span class="title">${n.title}</span>
@@ -937,5 +986,23 @@
     appRoot.classList.remove("app-hidden");
     hero.addEventListener("transitionend", () => { hero.style.display = "none"; }, { once: true });
   });
+
+  // ---- replay: bring the hero back (e.g. from the app's logo click) and
+  // restart its whole entrance choreography from zero, not just reveal it
+  // in its already-finished end state.
+  const REPLAY_SELECTOR = '[class*="h-fade"],[class*="h-slide"],[class*="h-scale"],[class*="h-grid"],.h-glow-outer,.h-glow-core';
+  function replayAnimations(root) {
+    const els = root.querySelectorAll(REPLAY_SELECTOR);
+    els.forEach((el) => { el.style.animation = "none"; });
+    void root.offsetWidth; // force reflow so the browser "forgets" the finished animation
+    els.forEach((el) => { el.style.animation = ""; });
+  }
+  window.SDOC_showHero = function showHero() {
+    appRoot.classList.add("app-hidden");
+    hero.style.display = "";
+    void hero.offsetWidth;
+    hero.classList.remove("hero-exit");
+    replayAnimations(hero);
+  };
 })();
 </script>
