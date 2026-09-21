@@ -2,7 +2,7 @@
 <title>Manifest Check</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #EFECE4;
@@ -81,7 +81,8 @@
     *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
   }
 
-  .app { display: flex; flex-direction: column; height: 100%; min-height: 100vh; }
+  .app { display: flex; flex-direction: column; height: 100%; min-height: 100vh; transition: opacity 600ms var(--ease-out); }
+  .app.app-hidden { opacity: 0; pointer-events: none; }
 
   /* ---------- header ---------- */
   header.top {
@@ -289,9 +290,220 @@
   .body-preview { background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; font-size: 12.5px; color: var(--ink-soft); white-space: pre-wrap; max-height: 160px; overflow: auto; line-height: 1.55; box-shadow: var(--inset-hi); }
 
   a.footer-link { color: var(--accent); }
+
+  /* ================================================================
+     HERO — cinematic full-screen intro. Deliberately its own dark-only
+     ice-blue world (distinct from the app's teal theme below), matching
+     the reference's single committed visual world.
+     ================================================================ */
+  #hero {
+    --h-accent: #AFDDFF; --h-accent-hover: #c8e8ff;
+    --h-muted: rgba(255,255,255,0.5); --h-grid: rgba(255,255,255,0.04);
+    --h-plus: rgba(255,255,255,0.7); --h-node-border: rgba(255,255,255,0.8);
+    --h-connector: rgba(255,255,255,0.25); --h-divider: rgba(255,255,255,0.1);
+    --h-ease-out: cubic-bezier(0.16,1,0.3,1); --h-ease-io: cubic-bezier(0.76,0,0.24,1);
+    --h-font: "Manrope", sans-serif;
+    position: fixed; inset: 0; z-index: 100; width: 100%; height: 100dvh;
+    overflow: hidden; background: #000;
+    transition: opacity 700ms var(--h-ease-io), filter 700ms var(--h-ease-io);
+  }
+  #hero * { box-sizing: border-box; }
+  #hero.hero-exit { opacity: 0; filter: blur(6px); pointer-events: none; }
+
+  .h-aurora { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  .h-blob { position: absolute; border-radius: 50%; filter: blur(90px); will-change: transform; }
+  .h-blob-1 { width: 520px; height: 520px; left: -120px; top: -140px; opacity: 0.35; background: radial-gradient(circle, var(--h-accent), transparent 70%); animation: hDrift1 34s var(--h-ease-io) infinite alternate; }
+  .h-blob-2 { width: 460px; height: 460px; right: -140px; bottom: -120px; opacity: 0.2; background: radial-gradient(circle, #6f8cff, transparent 70%); animation: hDrift2 40s var(--h-ease-io) infinite alternate; }
+  .h-blob-3 { width: 360px; height: 360px; left: 38%; top: 30%; opacity: 0.12; background: radial-gradient(circle, var(--h-accent), transparent 70%); animation: hDrift3 46s var(--h-ease-io) infinite alternate; }
+  @keyframes hDrift1 { from { transform: translate(0,0); } to { transform: translate(60px,40px); } }
+  @keyframes hDrift2 { from { transform: translate(0,0); } to { transform: translate(-50px,-60px); } }
+  @keyframes hDrift3 { from { transform: translate(0,0) scale(1); } to { transform: translate(-40px,30px) scale(1.12); } }
+  @media (prefers-reduced-motion: reduce) { .h-blob { animation: none !important; } }
+
+  .h-content { position: relative; z-index: 10; width: 100%; height: 100%; }
+
+  @keyframes hFadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes hFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes hSlideLeft { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes hSlideRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes hScaleIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+  @keyframes hGridV { from { opacity: 0; transform: scaleY(0); } to { opacity: 1; transform: scaleY(1); } }
+  @keyframes hGridH { from { opacity: 0; transform: scaleX(0); } to { opacity: 1; transform: scaleX(1); } }
+  .h-fade-up { opacity: 0; animation: hFadeUp 0.9s var(--h-ease-out) forwards; }
+  .h-fade-in { opacity: 0; animation: hFadeIn 0.8s var(--h-ease-out) forwards; }
+  .h-slide-left { opacity: 0; animation: hSlideLeft 0.8s var(--h-ease-out) forwards; }
+  .h-slide-right { opacity: 0; animation: hSlideRight 0.8s var(--h-ease-out) forwards; }
+  .h-scale-in { opacity: 0; animation: hScaleIn 0.7s var(--h-ease-out) forwards; }
+  .h-grid-v { opacity: 0; transform-origin: top; animation: hGridV 1.2s var(--h-ease-out) forwards; }
+  .h-grid-h { opacity: 0; transform-origin: left; animation: hGridH 1.2s var(--h-ease-out) forwards; }
+
+  .h-nav { position: absolute; top: 0; left: 0; width: 100%; display: flex; align-items: center; padding: 20px; z-index: 20; }
+  @media (min-width: 768px) { .h-nav { padding: 27px 35px; } }
+  .h-left { display: flex; align-items: center; gap: 40px; }
+  .h-wordmark { font-family: var(--h-font); font-weight: 800; color: #fff; font-size: 18px; line-height: 21px; white-space: nowrap; }
+  @media (min-width: 768px) { .h-wordmark { font-size: 21px; } }
+  .h-links { display: none; align-items: center; gap: 40px; }
+  @media (min-width: 1024px) { .h-links { display: flex; } }
+  .h-navitem { display: flex; align-items: center; gap: 3px; }
+  .h-navitem .num { font-family: var(--h-font); color: color-mix(in srgb, var(--h-accent) 80%, transparent); font-size: 13px; line-height: 15.6px; }
+  .h-navitem .lab { font-family: var(--h-font); color: #fff; font-size: 13px; line-height: 15.6px; cursor: pointer; transition: color 200ms var(--h-ease-out); }
+  .h-navitem .lab:hover { color: var(--h-accent); }
+  .h-right { display: none; align-items: center; gap: 12px; margin-left: auto; }
+  @media (min-width: 1024px) { .h-right { display: flex; } }
+  .h-right svg { width: 15px; height: 15px; color: #fff; }
+  .h-right span { font-family: var(--h-font); color: #fff; font-size: 13px; line-height: 15.6px; white-space: nowrap; }
+  .h-right .h-live { color: var(--h-accent); }
+  .h-right .h-status { margin-left: 20px; }
+  .h-chip { background: var(--h-accent); color: #000; border-radius: 3px; padding: 2px 5px; font-family: var(--h-font); font-size: 13px; line-height: 15.6px; }
+
+  .h-burger { display: flex; margin-left: auto; position: relative; width: 40px; height: 40px; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; }
+  @media (min-width: 1024px) { .h-burger { display: none; } }
+  .h-burger svg { position: absolute; width: 22px; height: 22px; color: #fff; transition: all 300ms var(--h-ease-io); }
+  .h-burger .h-menu-icon { opacity: 1; transform: rotate(0) scale(1); }
+  .h-burger .h-x-icon { opacity: 0; transform: rotate(-90deg) scale(0.5); }
+  .h-burger.open .h-menu-icon { opacity: 0; transform: rotate(90deg) scale(0.5); }
+  .h-burger.open .h-x-icon { opacity: 1; transform: rotate(0) scale(1); }
+
+  .h-mmenu { position: fixed; inset: 0; z-index: 30; visibility: hidden; transition: visibility 500ms var(--h-ease-io); }
+  @media (min-width: 1024px) { .h-mmenu { display: none; } }
+  .h-mmenu.open { visibility: visible; }
+  .h-mmenu-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(12px); opacity: 0; transition: opacity 500ms var(--h-ease-io); }
+  .h-mmenu.open .h-mmenu-backdrop { opacity: 1; }
+  .h-mmenu-panel { position: relative; height: 100%; display: flex; flex-direction: column; padding: 96px 20px 40px; opacity: 0; transform: translateY(-16px); transition: all 500ms var(--h-ease-io); }
+  .h-mmenu.open .h-mmenu-panel { opacity: 1; transform: translateY(0); }
+  .h-mmenu-close { position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; color: #fff; }
+  .h-mmenu-close svg { width: 22px; height: 22px; }
+  .h-mmenu-list { display: flex; flex-direction: column; gap: 32px; }
+  .h-mmenu-row { display: flex; align-items: center; gap: 12px; opacity: 0; transform: translateX(-24px); transition: all 500ms var(--h-ease-io); }
+  .h-mmenu.open .h-mmenu-row { opacity: 1; transform: translateX(0); }
+  .h-mmenu-row .num { font-family: var(--h-font); color: color-mix(in srgb, var(--h-accent) 80%, transparent); font-size: 14px; }
+  .h-mmenu-row .lab { font-family: var(--h-font); color: #fff; font-size: 28px; line-height: 1.2; letter-spacing: -0.01em; }
+  .h-mmenu-wallet { margin-top: auto; padding-top: 40px; border-top: 1px solid var(--h-divider); opacity: 0; transform: translateY(16px); transition: all 500ms var(--h-ease-io); }
+  .h-mmenu.open .h-mmenu-wallet { opacity: 1; transform: translateY(0); }
+  .h-mmenu-wallet .row1 { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .h-mmenu-wallet .row2 { display: flex; align-items: center; gap: 8px; }
+  .h-mmenu-wallet span { font-family: var(--h-font); color: #fff; font-size: 13px; }
+
+  .h-headline { font-family: var(--h-font); font-weight: 800; color: #fff; line-height: 1em; position: absolute; left: 20px; top: 140px; max-width: 300px; font-size: 32px; }
+  @media (min-width: 640px) { .h-headline { font-size: 48px; top: 160px; max-width: 420px; } }
+  @media (min-width: 768px) { .h-headline { font-size: 68px; top: 178px; left: 35px; max-width: 554px; } }
+
+  .h-grid-v-line { position: absolute; top: 0; height: 100%; width: 1px; background: var(--h-grid); }
+  .h-grid-h-line { position: absolute; left: 0; width: 100%; height: 1px; background: var(--h-grid); }
+  .h-plus i { position: absolute; background: var(--h-plus); transform: translate(-50%,-50%); }
+  .h-plus .bar-h { width: 10px; height: 1px; }
+  .h-plus .bar-v { width: 1px; height: 10px; }
+
+  .h-nodes { position: absolute; inset: 0; pointer-events: none; display: none; }
+  @media (min-width: 768px) { .h-nodes { display: block; } }
+  .h-node-sq { position: absolute; width: 80px; height: 80px; border: 1px solid var(--h-node-border); }
+  @media (min-width: 1024px) { .h-node-sq { width: 100px; height: 100px; } }
+  .h-node-label .title { font-family: var(--h-font); color: #fff; font-size: 13px; line-height: 15.6px; white-space: nowrap; }
+  .h-node-label p { font-family: var(--h-font); color: var(--h-muted); font-size: 11px; line-height: 14px; margin-top: 4px; }
+
+  .h-bottom { position: absolute; left: 20px; right: 20px; bottom: 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 20px; }
+  @media (min-width: 768px) { .h-bottom { left: 35px; right: 35px; bottom: 35px; flex-direction: row; align-items: flex-end; justify-content: space-between; gap: 0; } }
+
+  .h-cta { background: var(--h-accent); border: none; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px 16px; transition: background-color 200ms var(--h-ease-out), transform 140ms var(--h-ease-out); }
+  @media (min-width: 768px) { .h-cta { padding: 12px 20px; } }
+  .h-cta:hover { background: var(--h-accent-hover); }
+  .h-cta:active { transform: scale(0.97); }
+  .h-cta .star { color: #000; font-size: 16px; line-height: 1; }
+  .h-cta .label { font-family: var(--h-font); color: #000; font-size: 12px; line-height: 15.6px; text-transform: uppercase; letter-spacing: 0.025em; }
+  @media (min-width: 768px) { .h-cta .label { font-size: 13px; } }
+
+  .h-card-wrap { position: relative; max-width: 280px; display: none; }
+  @media (min-width: 640px) { .h-card-wrap { display: block; } }
+  .h-badge { font-family: var(--h-font); color: #000; background: var(--h-accent); font-size: 13px; line-height: 15.6px; padding: 2px 6px; display: inline-block; margin-bottom: 10px; }
+  .h-card { position: relative; padding: 20px; }
+  .h-card svg.h-chamfer { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .h-card p { position: relative; font-family: var(--h-font); color: #fff; font-size: 13px; line-height: 18px; margin-bottom: 18px; }
+  .h-card a { position: relative; font-family: var(--h-font); color: var(--h-accent); font-size: 13px; line-height: 15.6px; cursor: pointer; text-decoration: none; }
+  .h-card a:hover { text-decoration: underline; }
 </style>
 
-<div class="app">
+<section id="hero" aria-label="Intro">
+  <div class="h-aurora" aria-hidden="true">
+    <div class="h-blob h-blob-1"></div>
+    <div class="h-blob h-blob-2"></div>
+    <div class="h-blob h-blob-3"></div>
+  </div>
+
+  <div class="h-content">
+    <nav class="h-nav">
+      <div class="h-left">
+        <span class="h-wordmark h-fade-up" style="animation-delay:200ms">MANIFEST CHECK</span>
+        <div class="h-links">
+          <div class="h-navitem h-fade-up" style="animation-delay:350ms"><span class="num">01.</span><span class="lab">CLASSIFY</span></div>
+          <div class="h-navitem h-fade-up" style="animation-delay:450ms"><span class="num">02.</span><span class="lab">EXTRACT</span></div>
+          <div class="h-navitem h-fade-up" style="animation-delay:550ms"><span class="num">03.</span><span class="lab">COMPARE</span></div>
+          <div class="h-navitem h-fade-up" style="animation-delay:650ms"><span class="num">04.</span><span class="lab">ESCALATE</span></div>
+        </div>
+      </div>
+      <div class="h-right h-slide-right" style="animation-delay:600ms">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>
+        <span>520 EMAILS</span>
+        <span class="h-live">[ LIVE ]</span>
+        <span class="h-status">STATUS:</span>
+        <span class="h-chip">0.987 SCORE</span>
+      </div>
+      <button class="h-burger h-fade-in" id="hBurger" style="animation-delay:400ms" aria-label="Toggle menu">
+        <svg class="h-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        <svg class="h-x-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </nav>
+
+    <div class="h-mmenu" id="hMmenu">
+      <div class="h-mmenu-backdrop" id="hMmenuBackdrop"></div>
+      <div class="h-mmenu-panel">
+        <button class="h-mmenu-close" id="hMmenuClose" aria-label="Close menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+        <div class="h-mmenu-list">
+          <div class="h-mmenu-row" style="transition-delay:150ms"><span class="num">01.</span><span class="lab">CLASSIFY</span></div>
+          <div class="h-mmenu-row" style="transition-delay:225ms"><span class="num">02.</span><span class="lab">EXTRACT</span></div>
+          <div class="h-mmenu-row" style="transition-delay:300ms"><span class="num">03.</span><span class="lab">COMPARE</span></div>
+          <div class="h-mmenu-row" style="transition-delay:375ms"><span class="num">04.</span><span class="lab">ESCALATE</span></div>
+        </div>
+        <div class="h-mmenu-wallet" style="transition-delay:450ms">
+          <div class="row1">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>
+            <span>520 EMAILS</span>
+            <span style="color:var(--h-accent)">[ LIVE ]</span>
+          </div>
+          <div class="row2">
+            <span>STATUS:</span>
+            <span class="h-chip">0.987 SCORE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h1 class="h-headline h-fade-up" style="animation-delay:400ms">Catch The Error.<br>Before It Ships.</h1>
+
+    <div id="hGrid" aria-hidden="true"></div>
+    <div class="h-nodes" id="hNodes" aria-hidden="true"></div>
+
+    <div class="h-bottom">
+      <button class="h-cta h-fade-up" id="hCta" style="animation-delay:900ms">
+        <span class="star">&#10022;</span>
+        <span class="label">Enter the Inbox</span>
+      </button>
+      <div class="h-card-wrap h-slide-right" style="animation-delay:1100ms">
+        <span class="h-badge">NOT A MOCKUP &mdash; A LIVE PIPELINE</span>
+        <div class="h-card">
+          <svg class="h-chamfer" viewBox="0 0 280 168" preserveAspectRatio="none">
+            <polygon points="0.5,0.5 279.5,0.5 279.5,167.5 30,167.5 0.5,137.5" fill="none" stroke="#AFDDFF" stroke-width="1" vector-effect="non-scaling-stroke"/>
+          </svg>
+          <p>Every result here is computed live in your browser &mdash; the same classify, extract, and compare logic that scored 0.987 against the organizers&rsquo; hidden answer key.</p>
+          <a href="https://github.com/iban-1/AverisXHackathon" target="_blank" rel="noopener">VIEW_SOURCE_CODE</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="app app-hidden" id="appRoot">
   <header class="top">
     <div class="top-row">
       <div class="brand">
@@ -647,5 +859,83 @@
   // would otherwise be hidden behind the "detail-open" toggle -- a
   // first-time visitor should see the explainer before the raw inbox list.
   document.getElementById("work").classList.add("detail-open");
+})();
+</script>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---- grid lines + plus-mark intersections ----
+  const verticalPositions = ["12.6%", "37.5%", "61.9%", "86.2%"];
+  const horizontalPositions = ["32.7%", "71.4%"];
+  const gridEl = document.getElementById("hGrid");
+  let gridHtml = "";
+  verticalPositions.forEach((left, i) => {
+    gridHtml += `<div class="h-grid-v-line h-grid-v" style="left:${left};animation-delay:${600 + i * 100}ms"></div>`;
+  });
+  horizontalPositions.forEach((top, i) => {
+    gridHtml += `<div class="h-grid-h-line h-grid-h" style="top:${top};animation-delay:${800 + i * 150}ms"></div>`;
+  });
+  horizontalPositions.forEach((top, hi) => {
+    verticalPositions.forEach((left, vi) => {
+      const delay = 1000 + (hi * 4 + vi) * 80;
+      gridHtml += `<div class="h-plus h-scale-in" style="top:${top};left:${left};animation-delay:${delay}ms">
+        <i class="bar-h"></i><i class="bar-v"></i>
+      </div>`;
+    });
+  });
+  gridEl.innerHTML = gridHtml;
+
+  // ---- central nodes + connectors ----
+  const NODES = [
+    { sq: { top: "27%", left: "60%" }, sqDelay: 1500, label: { top: "11%", left: "26%" }, anim: "h-slide-left", labelDelay: 1100, title: "[ CLASSIFY ]", desc: "Reads the subject line and sorts every email into one of five categories.", maxw: "160px" },
+    { sq: { top: "58%", left: "32%" }, sqDelay: 1800, label: { top: "76%", left: "3%" }, anim: "h-slide-left", labelDelay: 1400, title: "[ EXTRACT ]", desc: "Pulls seven shipment fields from SI and BL attachments, resolving label differences.", maxw: "160px" },
+    { sq: { top: "63%", left: "50%" }, sqDelay: 2100, label: { top: "50%", left: "78%" }, anim: "h-slide-right", labelDelay: 1700, title: "[ COMPARE ]", desc: "Flags real discrepancies, escalating anything it can't confidently decide.", maxw: "180px" },
+  ];
+  const CONNECTORS = [
+    { x1: "38%", y1: "14%", x2: "52%", y2: "14%", delay: 1200 },
+    { x1: "52%", y1: "14%", x2: "60%", y2: "27%", delay: 1400 },
+    { x1: "32%", y1: "58%", x2: "20%", y2: "74%", delay: 1500 },
+    { x1: "20%", y1: "74%", x2: "6%", y2: "74%", delay: 1700 },
+    { x1: "78%", y1: "53%", x2: "63%", y2: "53%", delay: 1800 },
+    { x1: "63%", y1: "53%", x2: "50%", y2: "63%", delay: 2000 },
+  ];
+  const nodesEl = document.getElementById("hNodes");
+  let nodesHtml = "";
+  CONNECTORS.forEach((c) => {
+    nodesHtml += `<svg class="h-fade-in" style="position:absolute;inset:0;width:100%;height:100%;animation-delay:${c.delay}ms">
+      <line x1="${c.x1}" y1="${c.y1}" x2="${c.x2}" y2="${c.y2}" stroke="var(--h-connector)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+    </svg>`;
+  });
+  NODES.forEach((n) => {
+    nodesHtml += `<div class="h-node-sq h-scale-in" style="top:${n.sq.top};left:${n.sq.left};animation-delay:${n.sqDelay}ms"></div>`;
+    nodesHtml += `<div class="h-node-label ${n.anim}" style="position:absolute;top:${n.label.top};left:${n.label.left};animation-delay:${n.labelDelay}ms">
+      <span class="title">${n.title}</span>
+      <p style="max-width:${n.maxw}">${n.desc}</p>
+    </div>`;
+  });
+  nodesEl.innerHTML = nodesHtml;
+
+  // ---- mobile menu ----
+  const burger = document.getElementById("hBurger");
+  const mmenu = document.getElementById("hMmenu");
+  function setMenu(open) {
+    burger.classList.toggle("open", open);
+    mmenu.classList.toggle("open", open);
+  }
+  burger.addEventListener("click", () => setMenu(!mmenu.classList.contains("open")));
+  document.getElementById("hMmenuClose").addEventListener("click", () => setMenu(false));
+  document.getElementById("hMmenuBackdrop").addEventListener("click", () => setMenu(false));
+
+  // ---- CTA: transition hero -> app ----
+  const hero = document.getElementById("hero");
+  const appRoot = document.getElementById("appRoot");
+  document.getElementById("hCta").addEventListener("click", () => {
+    setMenu(false);
+    hero.classList.add("hero-exit");
+    appRoot.classList.remove("app-hidden");
+    hero.addEventListener("transitionend", () => { hero.style.display = "none"; }, { once: true });
+  });
 })();
 </script>
