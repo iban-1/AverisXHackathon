@@ -102,7 +102,7 @@
   .brand h1:active { transform: scale(0.99); }
   .brand .tag { color: var(--ink-soft); font-size: 13px; }
   .team-badge {
-    font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
     color: var(--accent); border: 1px solid var(--accent); background: var(--accent-soft);
     border-radius: 999px; padding: 5px 12px 4px;
   }
@@ -274,7 +274,7 @@
   table.cmp tr.diff td { background: var(--mismatch-bg); position: relative; }
   table.cmp tr.diff td.field-name { color: var(--mismatch); font-family: var(--font-body); font-weight: 600; box-shadow: inset 3px 0 0 var(--mismatch); }
   table.cmp td.field-name { font-family: var(--font-body); font-weight: 500; color: var(--ink-soft); width: 132px; }
-  .match-badge { display: inline-block; font-family: var(--font-body); font-size: 10.5px; color: var(--ok); margin-left: 6px; }
+  .match-badge { display: inline-block; font-family: var(--font-body); font-size: 11px; color: var(--ok); margin-left: 6px; }
 
   details.raw { margin-top: 18px; }
   details.raw summary { cursor: pointer; font-size: 12px; color: var(--ink-soft); font-family: var(--font-mono); transition: color 160ms var(--ease-out); }
@@ -423,7 +423,7 @@
           <div class="row-subject">${escapeHtml(r.email.subject || "(no subject)")}</div>
           <div class="row-meta">${escapeHtml(r.email.from || "")}</div>
         </span>
-        ${statusText ? `<span class="row-pill pill pill-${statusText === "OK" ? "ok" : statusText === "MISMATCH" ? "mismatch" : "review"}" style="padding:2px 7px;font-size:9.5px;">${statusText === "NEEDS_REVIEW" ? "REVIEW" : statusText}</span>` : ""}
+        ${statusText ? `<span class="row-pill pill pill-${statusText === "OK" ? "ok" : statusText === "MISMATCH" ? "mismatch" : "review"}" style="padding:3px 8px;font-size:11px;">${statusText === "NEEDS_REVIEW" ? "REVIEW" : statusText}</span>` : ""}
       </li>`;
     }).join("");
     listEl.querySelectorAll(".row").forEach((el) => {
